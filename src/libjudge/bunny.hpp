@@ -31,7 +31,7 @@ private:
 
 public:
 	bunny(env &env, bool trusted,
-		const std::string &executable_path, const std::string &command_line, const winstl::path_a &current_dir,
+		const std::string &executable_path, const std::string &command_line, const std::vector<std::wstring> &env_var, const winstl::path_a &current_dir,
 		HANDLE stdin_handle, HANDLE stdout_handle, HANDLE stderr_handle, const judge_limit &limit);
 
 	void start();

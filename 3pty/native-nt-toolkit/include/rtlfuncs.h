@@ -2496,6 +2496,7 @@ RtlDeleteTimerQueue(HANDLE TimerQueue);
 //
 // SList functions
 //
+#if !defined(_WIN32_WINNT_WIN8)
 PSLIST_ENTRY
 FASTCALL
 InterlockedPushListSList(
@@ -2504,6 +2505,7 @@ InterlockedPushListSList(
     IN PSLIST_ENTRY ListEnd,
     IN ULONG Count
 );
+#endif
 
 //
 // Range List functions

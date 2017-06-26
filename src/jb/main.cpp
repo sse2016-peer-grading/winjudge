@@ -68,6 +68,7 @@ int verbose = 0;
 const char *package = nullptr;
 const char *source = nullptr;
 const char *compiler = nullptr;
+const wchar_t *env_var = nullptr;
 bool loop = false;
 judge_flag_t flag = JUDGE_ACCEPTED;
 const char *env = nullptr;
@@ -244,6 +245,7 @@ int main(int argc, char *argv[])
 	try {
 		bool next_package = false;
 		bool next_compiler = false;
+		bool next_env_var = false;
 		bool next_env = false;
 		bool next_thread = false;
 
@@ -258,6 +260,12 @@ int main(int argc, char *argv[])
 					throw runtime_error("compiler is already specified");
 				compiler = argv[i];
 				next_compiler = false;
+			} else if (next_env_var) {
+				if (env_var != nullptr)
+					throw runtime_error("env_var is already specified");
+				env_var = new wchar_t[4096];
+				mbstowcs(const_cast<wchar_t*>(env_var), argv[i], 4095);
+				next_env_var = false;
 			} else if (next_env) {
 				if (env != nullptr)
 					throw runtime_error("env is already specified");
@@ -276,6 +284,8 @@ int main(int argc, char *argv[])
 				next_package = true;
 			} else if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "-compiler")) {
 				next_compiler = true;
+			} else if (!strcmp(argv[i], "-envvar")) {
+				next_env_var = true;
 			} else if (!strcmp(argv[i], "-e") || !strcmp(argv[i], "-env")) {
 				next_env = true;
 			} else if (!strcmp(argv[i], "-t") || !strcmp(argv[i], "-thread")) {
@@ -302,6 +312,8 @@ int main(int argc, char *argv[])
 			throw runtime_error("source is not specified, try -h for help");
 		if (compiler == nullptr)
 			compiler = "";
+		if (env_var == nullptr)
+			env_var = L"";
 
 		jstatus_t status = judge_create_pool(&pool, temp_path().c_str());
 		if (!JSUCCESS(status)) {
@@ -324,7 +336,7 @@ int main(int argc, char *argv[])
 		while (compiler_settings.size() < 6)
 			compiler_settings.push_back(string());
 		status = judge_create_compiler(&compiler_object,
-			compiler_settings[0].c_str(), compiler_settings[1].c_str(),
+			compiler_settings[0].c_str(), compiler_settings[1].c_str(), env_var,
 			compiler_settings[2].c_str(), compiler_settings[3].c_str(),
 			nullptr,
 			compiler_settings[4].c_str(), compiler_settings[5].c_str());

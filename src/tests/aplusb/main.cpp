@@ -60,7 +60,7 @@ int main()
 
 	create_fs();
 
-	status = judge_create_pool(&pool, "E:\\temp");
+	status = judge_create_pool(&pool, "C:\\temp");
 	assert(JSUCCESS(status));
 	status = judge_add_env_unsafe(pool);
 	assert(JSUCCESS(status));
@@ -70,8 +70,8 @@ int main()
 	limit.time_limit_ms = 15000;
 	limit.memory_limit_kb = 0;
 	limit.stderr_output_limit = 0;
-	status = judge_create_compiler(&compiler, "C:\\MinGW32\\bin\\gcc.exe",
-		"gcc -ofoo.exe foo.c", "foo.c", "foo.exe", &limit, "", "");
+	status = judge_create_compiler(&compiler, "C:\\TDM-GCC-510-32\\bin\\gcc.exe",
+		"gcc -ofoo.exe foo.c", L"PATH=C:\\TDM-GCC-510-32\\bin\\", "foo.c", "foo.exe", &limit, "", "");
 	assert(JSUCCESS(status));
 	status = judge_create_test(&test, pool, compiler, ramfs, "source");
 	assert(JSUCCESS(status));

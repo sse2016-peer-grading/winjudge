@@ -50,6 +50,8 @@ Author:
 // Exception Flags
 //
 #define EXCEPTION_CHAIN_END                                 ((PEXCEPTION_REGISTRATION_RECORD)-1)
+
+#if !defined(_WIN32_WINNT_WIN8)
 #define EXCEPTION_UNWINDING                                 0x02
 #define EXCEPTION_EXIT_UNWIND                               0x04
 #define EXCEPTION_STACK_INVALID                             0x08
@@ -57,6 +59,7 @@ Author:
 #define EXCEPTION_NESTED_CALL                               0x10
 #define EXCEPTION_TARGET_UNWIND                             0x20
 #define EXCEPTION_COLLIDED_UNWIND                           0x20
+#endif
 
 //
 // Range and Range List Flags
@@ -963,11 +966,13 @@ typedef struct _RTL_HANDLE_TABLE
 //
 // Exception Record
 //
+#if !defined(_WIN32_WINNT_WIN8)
 typedef struct _EXCEPTION_REGISTRATION_RECORD
 {
     struct _EXCEPTION_REGISTRATION_RECORD *Next;
     PEXCEPTION_ROUTINE Handler;
 } EXCEPTION_REGISTRATION_RECORD, *PEXCEPTION_REGISTRATION_RECORD;
+#endif
 
 //
 // Current Directory Structures

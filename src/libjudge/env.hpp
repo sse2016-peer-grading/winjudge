@@ -26,6 +26,7 @@ public:
 		std::shared_ptr<thread_suspension> > create_process(
 		const std::string &executable_path,
 		const std::string &command_line,
+		const std::vector<std::wstring> &env_var, 
 		const winstl::path_a &current_dir,
 		HANDLE stdin_handle,
 		HANDLE stdout_handle,
@@ -35,6 +36,7 @@ public:
 		std::shared_ptr<thread_suspension> > create_process_trusted(
 		const std::string &executable_path,
 		const std::string &command_line,
+		const std::vector<std::wstring> &env_var, 
 		const winstl::path_a &current_dir,
 		HANDLE stdin_handle,
 		HANDLE stdout_handle,
@@ -61,6 +63,7 @@ public:
 		std::shared_ptr<thread_suspension> > create_process(
 		const std::string &executable_path,
 		const std::string &command_line,
+		const std::vector<std::wstring> &env_var, 
 		const winstl::path_a &current_dir,
 		HANDLE stdin_handle,
 		HANDLE stdout_handle,

@@ -175,7 +175,7 @@ judge_result testcase_impl::run(env &env, compiler::result &cr)
 	}
 
 	shared_ptr<testcase_impl::context> context(new testcase_impl::context(*this));
-	judge::bunny bunny(env, false, executable_path.c_str(), cr.compiler->target_command_line(), dir->path(),
+	judge::bunny bunny(env, false, executable_path.c_str(), cr.compiler->target_command_line(), cr.compiler->env_var(), dir->path(),
 		context->stdin_pipe.read_handle(), context->stdout_pipe.write_handle(), context->stderr_pipe.write_handle(), limit_);
 	context->stdin_pipe.close_read();
 	context->stdout_pipe.close_write();

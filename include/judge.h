@@ -60,6 +60,7 @@ judge_create_compiler(
 	// Compiler settings
 	const char *executable_path,
 	const char *command_line,
+	const wchar_t *env_var,
 	const char *source_filename,
 	const char *target_filename,
 	/* optional */ struct judge_limit *compiler_limit,

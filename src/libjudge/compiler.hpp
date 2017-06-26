@@ -2,6 +2,7 @@
 #define _COMPILER_HPP
 
 #include <memory>
+#include <vector>
 #include <string>
 #include <cstdint>
 #include <judge.h>
@@ -26,6 +27,7 @@ public:
 		// Compiler settings
 		const std::string &executable_path,
 		const std::string &command_line,
+		const std::vector<std::wstring> &env_var,
 		const std::string &source_filename,
 		const std::string &target_filename,
 		judge_limit &limit,
@@ -45,6 +47,7 @@ private:
 public:
 	const std::string &executable_path();
 	const std::string &command_line();
+	const std::vector<std::wstring> &env_var();
 	const std::string &source_filename();
 	const std::string &target_filename();
 	const judge_limit &limit();
@@ -58,6 +61,7 @@ private:
 private:
 	std::string executable_path_;
 	std::string command_line_;
+	std::vector<std::wstring> env_var_;
 	std::string source_filename_;
 	std::string target_filename_;
 	judge_limit limit_;

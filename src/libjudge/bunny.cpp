@@ -31,7 +31,7 @@ struct bunny::context {
 };
 
 bunny::bunny(env &env, bool trusted,
-	const string &executable_path, const string &command_line, const path_a &current_dir,
+	const string &executable_path, const string &command_line, const vector<wstring> &env_var, const path_a &current_dir,
 	HANDLE stdin_handle, HANDLE stdout_handle, HANDLE stderr_handle, const judge_limit &limit)
 	: job_(new job_object)
 	, context_(new context)
@@ -56,12 +56,12 @@ bunny::bunny(env &env, bool trusted,
 	_tune_job_object();
 
 	if (trusted) {
-		auto pp = env.create_process_trusted(executable_path, command_line, current_dir,
+		auto pp = env.create_process_trusted(executable_path, command_line, env_var, current_dir,
 			stdin_handle, stdout_handle, stderr_handle);
 		process_ = pp.first;
 		thread_suspension_ = pp.second;
 	} else {
-		auto pp = env.create_process(executable_path, command_line, current_dir,
+		auto pp = env.create_process(executable_path, command_line, env_var, current_dir,
 			stdin_handle, stdout_handle, stderr_handle);
 		process_ = pp.first;
 		thread_suspension_ = pp.second;

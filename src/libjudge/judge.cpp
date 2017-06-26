@@ -85,6 +85,7 @@ judge_create_compiler(
 	/* out */ struct judge_compiler **compiler,
 	const char *executable_path,
 	const char *command_line,
+	const wchar_t *env_var,
 	const char *source_filename,
 	const char *target_filename,
 	struct judge_limit *compiler_limit,
@@ -96,9 +97,20 @@ judge_create_compiler(
 		source_filename = target_filename = "tmpfile";
 	}
 
+	wchar_t env_var_buffer[4096];
+	lstrcpyW(env_var_buffer, env_var);
+
+	vector<wstring> env_variables;
+	wchar_t *pch = wcstok(env_var_buffer, L";");
+	while (pch != NULL)
+	{
+		env_variables.push_back(pch);
+		pch = wcstok(NULL, L";");
+	}
+
 	return util::wrap([=]()->jstatus_t {
 		shared_ptr<judge::compiler> p(
-			new judge::compiler(executable_path, command_line,
+			new judge::compiler(executable_path, command_line, env_variables,
 				source_filename, target_filename, sanitize(compiler_limit),
 				target_executable_path, target_command_line));
 		*compiler = reinterpret_cast<struct judge_compiler *>(

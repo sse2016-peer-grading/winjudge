@@ -110,19 +110,37 @@ judge::pool &env::pool()
 }
 
 pair<shared_ptr<process>, shared_ptr<thread_suspension> > env::create_process(
-	const string &executable_path, const string &command_line, const path_a &current_dir,
+	const string &executable_path, const string &command_line, const vector<wstring> &env_var, const path_a &current_dir,
 	HANDLE stdin_handle, HANDLE stdout_handle, HANDLE stderr_handle)
 {
-	return create_process_trusted(executable_path, command_line, current_dir,
+	return create_process_trusted(executable_path, command_line, env_var, current_dir,
 		stdin_handle, stdout_handle, stderr_handle);
 }
 
 pair<shared_ptr<process>, shared_ptr<thread_suspension> > env::create_process_trusted(
-	const string &executable_path, const string &command_line, const path_a &current_dir,
+	const string &executable_path, const string &command_line, const vector<wstring> &env_var, const path_a &current_dir,
 	HANDLE stdin_handle, HANDLE stdout_handle, HANDLE stderr_handle)
 {
 	PROCESS_INFORMATION process_info;
 	BOOL result;
+
+	WCHAR chEnvBlock[4096];
+	LPWSTR lpsCurrentDestVariable = chEnvBlock;
+	for (const wstring & var : env_var) {
+		lstrcpyW(lpsCurrentDestVariable, var.c_str());
+		lpsCurrentDestVariable += wcslen(lpsCurrentDestVariable) + 1;
+	}
+	LPWCH lpEnv = ::GetEnvironmentStringsW();
+	LPWSTR lpsCurrentSrcVariable = lpEnv;
+	while (*lpsCurrentSrcVariable) {
+		if (*lpsCurrentSrcVariable != L'=') {
+			lstrcpyW(lpsCurrentDestVariable, lpsCurrentSrcVariable);
+			lpsCurrentDestVariable += wcslen(lpsCurrentDestVariable) + 1;
+		}
+		lpsCurrentSrcVariable += wcslen(lpsCurrentSrcVariable) + 1;
+	}
+	::FreeEnvironmentStringsW(lpEnv);
+	*lpsCurrentDestVariable = '\0';
 
 	if (!proc_thread_attribute_list::is_supported()) {
 		STARTUPINFOA startup_info = {0};
@@ -139,8 +157,8 @@ pair<shared_ptr<process>, shared_ptr<thread_suspension> > env::create_process_tr
 
 		result = ::CreateProcessA(executable_path.empty() ? NULL : executable_path.c_str(),
 			const_cast<LPSTR>(command_line.c_str()), NULL, NULL, FALSE,
-			CREATE_BREAKAWAY_FROM_JOB | CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_SUSPENDED,
-			NULL, current_dir.c_str(), &startup_info, &process_info);
+			CREATE_UNICODE_ENVIRONMENT | CREATE_BREAKAWAY_FROM_JOB | CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_SUSPENDED,
+			chEnvBlock, current_dir.c_str(), &startup_info, &process_info);
 
 		if (result) {
 			try {
@@ -179,8 +197,8 @@ pair<shared_ptr<process>, shared_ptr<thread_suspension> > env::create_process_tr
 
 		result = ::CreateProcessA(executable_path.empty() ? NULL : executable_path.c_str(),
 			const_cast<LPSTR>(command_line.c_str()), NULL, NULL, TRUE,
-			CREATE_BREAKAWAY_FROM_JOB | CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_SUSPENDED | EXTENDED_STARTUPINFO_PRESENT,
-			NULL, current_dir.c_str(), &info.StartupInfo, &process_info);
+			CREATE_UNICODE_ENVIRONMENT | CREATE_BREAKAWAY_FROM_JOB | CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_SUSPENDED | EXTENDED_STARTUPINFO_PRESENT,
+			chEnvBlock, current_dir.c_str(), &info.StartupInfo, &process_info);
 	}
 
 	if (!result) {
@@ -225,12 +243,30 @@ restricted_env::restricted_env(const std::shared_ptr<judge::pool> &pool,
 }
 
 pair<shared_ptr<process>, shared_ptr<thread_suspension> > restricted_env::create_process(
-	const string &executable_path, const string &command_line, const path_a &current_dir,
+	const string &executable_path, const string &command_line, const vector<wstring> &env_var, const path_a &current_dir,
 	HANDLE stdin_handle, HANDLE stdout_handle, HANDLE stderr_handle)
 {
 	string desktop_name = window_station_.name() + "\\" + desktop_.name();
 	PROCESS_INFORMATION process_info;
 	BOOL result;
+
+	WCHAR chEnvBlock[4096];
+	LPWSTR lpsCurrentDestVariable = chEnvBlock;
+	for (const wstring & var : env_var) {
+		lstrcpyW(lpsCurrentDestVariable, var.c_str());
+		lpsCurrentDestVariable += wcslen(lpsCurrentDestVariable) + 1;
+	}
+	LPWCH lpEnv = ::GetEnvironmentStringsW();
+	LPWSTR lpsCurrentSrcVariable = lpEnv;
+	while (*lpsCurrentSrcVariable) {
+		if (*lpsCurrentSrcVariable != L'=') {
+			lstrcpyW(lpsCurrentDestVariable, lpsCurrentSrcVariable);
+			lpsCurrentDestVariable += wcslen(lpsCurrentDestVariable) + 1;
+		}
+		lpsCurrentSrcVariable += wcslen(lpsCurrentSrcVariable) + 1;
+	}
+	::FreeEnvironmentStringsW(lpEnv);
+	*lpsCurrentDestVariable = '\0';
 
 	if (!proc_thread_attribute_list::is_supported()) {
 		STARTUPINFOA startup_info = {0};
@@ -248,8 +284,8 @@ pair<shared_ptr<process>, shared_ptr<thread_suspension> > restricted_env::create
 
 		result = ::CreateProcessAsUserA(session_.handle(), executable_path.empty() ? NULL : executable_path.c_str(),
 			const_cast<LPSTR>(command_line.c_str()), NULL, NULL, FALSE,
-			CREATE_BREAKAWAY_FROM_JOB | CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_SUSPENDED,
-			NULL, current_dir.c_str(), &startup_info, &process_info);
+			CREATE_UNICODE_ENVIRONMENT | CREATE_BREAKAWAY_FROM_JOB | CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_SUSPENDED,
+			chEnvBlock, current_dir.c_str(), &startup_info, &process_info);
 
 		if (result) {
 			try {
@@ -289,8 +325,8 @@ pair<shared_ptr<process>, shared_ptr<thread_suspension> > restricted_env::create
 
 		result = ::CreateProcessAsUserA(session_.handle(), executable_path.empty() ? NULL : executable_path.c_str(),
 			const_cast<LPSTR>(command_line.c_str()), NULL, NULL, TRUE,
-			CREATE_BREAKAWAY_FROM_JOB | CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_SUSPENDED | EXTENDED_STARTUPINFO_PRESENT,
-			NULL, current_dir.c_str(), &info.StartupInfo, &process_info);
+			CREATE_UNICODE_ENVIRONMENT | CREATE_BREAKAWAY_FROM_JOB | CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_SUSPENDED | EXTENDED_STARTUPINFO_PRESENT,
+			chEnvBlock, current_dir.c_str(), &info.StartupInfo, &process_info);
 	}
 
 	if (!result) {

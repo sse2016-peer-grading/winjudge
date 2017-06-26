@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cassert>
+#include <memory>
 #include <winstl/synch/event.hpp>
 #include <winstl/synch/atomic_types.h>
 #include <winstl/synch/atomic_functions.h>

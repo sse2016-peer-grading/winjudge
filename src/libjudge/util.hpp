@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <istream>
 #include <ostream>
 #include <stdexcept>

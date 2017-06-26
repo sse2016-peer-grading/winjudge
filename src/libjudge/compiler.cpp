@@ -28,6 +28,7 @@ namespace judge {
 compiler::compiler(
 	const string &executable_path,
 	const string &command_line,
+	const vector<wstring> &env_var,
 	const string &source_filename,
 	const string &target_filename,
 	judge_limit &limit,
@@ -35,6 +36,7 @@ compiler::compiler(
 	const string &target_command_line)
 	: executable_path_(executable_path)
 	, command_line_(command_line)
+	, env_var_(env_var)
 	, source_filename_(source_filename)
 	, target_filename_(target_filename)
 	, limit_(limit)
@@ -73,7 +75,7 @@ shared_ptr<compiler::result> compiler::compile(
 		pool.take_env(back_inserter(envs), 1);
 
 		winstl::pipe pipe(0, false);
-		judge::bunny bunny(*envs.front(), true, executable_path_, command_line_, result->dir->path(),
+		judge::bunny bunny(*envs.front(), true, executable_path_, command_line_, env_var_, result->dir->path(),
 			NULL, pipe.write_handle(), pipe.write_handle(), limit_);
 		pipe.close_write();
 
@@ -110,6 +112,11 @@ const string &compiler::executable_path()
 const string &compiler::command_line()
 {
 	return command_line_;
+}
+
+const vector<wstring> &compiler::env_var()
+{
+	return env_var_;
 }
 
 const string &compiler::source_filename()

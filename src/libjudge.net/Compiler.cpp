@@ -9,7 +9,7 @@ using namespace msclr::interop;
 
 namespace Judge {
 
-Compiler::Compiler(String ^executablePath, String ^commandLine,
+Compiler::Compiler(String ^executablePath, String ^commandLine, String ^envVar,
 	String ^sourceFilename, String ^targetFilename, JudgeLimit ^compilerLimit,
 	String ^targetExecutablePath, String ^targetCommandLine)
 	: compiler_(nullptr)
@@ -25,9 +25,12 @@ Compiler::Compiler(String ^executablePath, String ^commandLine,
 		limit.stderr_output_limit = compilerLimit->StderrOutputLimit;
 	}
 
+	pin_ptr<const wchar_t> wchEnvVar = PtrToStringChars(envVar);
+
 	jstatus_t status = judge_create_compiler(&result,
 		mc.marshal_as<const char *>(executablePath),
 		mc.marshal_as<const char *>(commandLine),
+		wchEnvVar,
 		mc.marshal_as<const char *>(sourceFilename),
 		mc.marshal_as<const char *>(targetFilename),
 		compilerLimit ? &limit : nullptr,

@@ -7,7 +7,7 @@ namespace Judge {
 
 public ref class Compiler {
 public:
-	Compiler(System::String ^executablePath, System::String ^commandLine,
+	Compiler(System::String ^executablePath, System::String ^commandLine, System::String ^envVar,
 		System::String ^sourceFilename, System::String ^targetFilename, JudgeLimit ^compilerLimit,
 		System::String ^targetExecutablePath, System::String ^targetCommandLine);
 	~Compiler() { this->!Compiler(); }
