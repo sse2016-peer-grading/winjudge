@@ -130,16 +130,6 @@ pair<shared_ptr<process>, shared_ptr<thread_suspension> > env::create_process_tr
 		lstrcpyW(lpsCurrentDestVariable, var.c_str());
 		lpsCurrentDestVariable += wcslen(lpsCurrentDestVariable) + 1;
 	}
-	LPWCH lpEnv = ::GetEnvironmentStringsW();
-	LPWSTR lpsCurrentSrcVariable = lpEnv;
-	while (*lpsCurrentSrcVariable) {
-		if (*lpsCurrentSrcVariable != L'=') {
-			lstrcpyW(lpsCurrentDestVariable, lpsCurrentSrcVariable);
-			lpsCurrentDestVariable += wcslen(lpsCurrentDestVariable) + 1;
-		}
-		lpsCurrentSrcVariable += wcslen(lpsCurrentSrcVariable) + 1;
-	}
-	::FreeEnvironmentStringsW(lpEnv);
 	*lpsCurrentDestVariable = '\0';
 
 	if (!proc_thread_attribute_list::is_supported()) {
@@ -256,16 +246,6 @@ pair<shared_ptr<process>, shared_ptr<thread_suspension> > restricted_env::create
 		lstrcpyW(lpsCurrentDestVariable, var.c_str());
 		lpsCurrentDestVariable += wcslen(lpsCurrentDestVariable) + 1;
 	}
-	LPWCH lpEnv = ::GetEnvironmentStringsW();
-	LPWSTR lpsCurrentSrcVariable = lpEnv;
-	while (*lpsCurrentSrcVariable) {
-		if (*lpsCurrentSrcVariable != L'=') {
-			lstrcpyW(lpsCurrentDestVariable, lpsCurrentSrcVariable);
-			lpsCurrentDestVariable += wcslen(lpsCurrentDestVariable) + 1;
-		}
-		lpsCurrentSrcVariable += wcslen(lpsCurrentSrcVariable) + 1;
-	}
-	::FreeEnvironmentStringsW(lpEnv);
 	*lpsCurrentDestVariable = '\0';
 
 	if (!proc_thread_attribute_list::is_supported()) {

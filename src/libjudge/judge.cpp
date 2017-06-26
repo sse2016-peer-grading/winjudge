@@ -101,11 +101,11 @@ judge_create_compiler(
 	lstrcpyW(env_var_buffer, env_var);
 
 	vector<wstring> env_variables;
-	wchar_t *pch = wcstok(env_var_buffer, L":");
+	wchar_t *pch = wcstok(env_var_buffer, L"||");
 	while (pch != NULL)
 	{
 		env_variables.push_back(pch);
-		pch = wcstok(NULL, L":");
+		pch = wcstok(NULL, L"||");
 	}
 
 	return util::wrap([=]()->jstatus_t {
