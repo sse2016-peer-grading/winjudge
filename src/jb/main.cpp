@@ -145,7 +145,7 @@ unsigned int __stdcall thread_entry(void *param)
 
 		do {
 			struct judge_test *test;
-			status = judge_create_test(&test, pool, compiler_object, ramfs, "source");
+			status = judge_create_test(&test, false, pool, compiler_object, ramfs, "source");
 			if (!JSUCCESS(status))
 				throw judge_exception(status);
 

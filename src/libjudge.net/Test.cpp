@@ -12,13 +12,13 @@ using namespace msclr::interop;
 
 namespace Judge {
 
-Test::Test(Pool ^pool, Compiler ^compiler, JudgeFs::Fs ^sourceFs, String ^sourcePath)
+Test::Test(Boolean spj, Pool ^pool, Compiler ^compiler, JudgeFs::Fs ^sourceFs, String ^sourcePath)
 	: test_(nullptr)
 {
 	marshal_context mc;
 	struct judge_test *result;
 
-	jstatus_t status = judge_create_test(&result, pool->Handle(), compiler->Handle(),
+	jstatus_t status = judge_create_test(&result, spj, pool->Handle(), compiler->Handle(),
 		sourceFs->Handle(), mc.marshal_as<const char *>(sourcePath));
 	if (!JSUCCESS(status)) {
 		throw gcnew JudgeException(status);

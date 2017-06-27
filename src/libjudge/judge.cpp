@@ -131,6 +131,7 @@ jstatus_t
 __stdcall
 judge_create_test(
 	/* out */ struct judge_test **test,
+	bool spj,
 	struct judge_pool *pool,
 	struct judge_compiler *compiler,
 	struct judgefs *source_fs,
@@ -140,7 +141,7 @@ judge_create_test(
 		shared_ptr<judge::compiler> &c = *reinterpret_cast<shared_ptr<judge::compiler> *>(compiler);
 		shared_ptr<judge::pool> &p(*reinterpret_cast<shared_ptr<judge::pool> *>(pool));
 		shared_ptr<judge::test> t(
-			new judge::test(p, c, source_fs, source_path));
+			new judge::test(spj, p, c, source_fs, source_path));
 		*test = reinterpret_cast<struct judge_test *>(
 			new shared_ptr<judge::test>(move(t)));
 		return JSTATUS_SUCCESS;

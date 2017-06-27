@@ -10,7 +10,7 @@ namespace Judge {
 
 public ref class Test {
 public:
-	Test(Pool ^pool, Compiler ^compiler, JudgeFs::Fs ^sourceFs, System::String ^sourcePath);
+	Test(System::Boolean spj, Pool ^pool, Compiler ^compiler, JudgeFs::Fs ^sourceFs, System::String ^sourcePath);
 	~Test() { this->!Test(); }
 	!Test();
 	void AddTestcase(JudgeFs::Fs ^dataFs, System::String ^inputPath, System::String ^outputPath, JudgeLimit ^limit);

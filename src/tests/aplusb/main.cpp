@@ -73,7 +73,7 @@ int main()
 	status = judge_create_compiler(&compiler, "C:\\TDM-GCC-510-32\\bin\\gcc.exe",
 		"gcc -ofoo.exe foo.c", L"PATH=C:\\TDM-GCC-510-32\\bin\\", "foo.c", "foo.exe", &limit, "", "");
 	assert(JSUCCESS(status));
-	status = judge_create_test(&test, pool, compiler, ramfs, "source");
+	status = judge_create_test(&test, false, pool, compiler, ramfs, "source");
 	assert(JSUCCESS(status));
 	limit.active_process_limit = 1;
 	limit.time_limit_ms = 1000;

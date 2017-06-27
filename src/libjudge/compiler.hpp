@@ -36,8 +36,13 @@ public:
 		const std::string &target_executable_path,
 		const std::string &target_command_line);
 
-	std::shared_ptr<compiler::result> compiler::compile(
+	std::shared_ptr<compiler::result> compiler::compile_normal(
 		pool &pool, judgefs *source_fs, const std::string &source_path);
+
+	std::shared_ptr<compiler::result> compiler::compile_spj(
+		pool &pool,
+		judgefs *source_fs, const std::string &source_header_path, const std::string &source_header_name,
+		const std::string &spj_source_path);
 
 private:
 	// non-copyable
@@ -57,6 +62,13 @@ public:
 private:
 	std::shared_ptr<temp_dir> _extract_source(
 		pool &pool, judgefs *fs, const std::string &path);
+
+	void _extract_spj_source(
+		std::shared_ptr<temp_dir> dir,
+		judgefs *fs, const std::string &path, const std::string &file_name);
+
+	void _compile(
+		pool &pool, std::shared_ptr<compiler::result> result);
 
 private:
 	std::string executable_path_;

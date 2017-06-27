@@ -80,6 +80,7 @@ jstatus_t
 __stdcall
 judge_create_test(
 	/* out */ struct judge_test **test,
+	bool spj,
 	struct judge_pool *pool,
 	struct judge_compiler *compiler,
 	struct judgefs *source_fs,

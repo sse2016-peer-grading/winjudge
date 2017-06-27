@@ -18,7 +18,7 @@ class testcase;
 
 class test {
 public:
-	test(const std::shared_ptr<pool> &pool,
+	test(const bool spj, const std::shared_ptr<pool> &pool,
 		const std::shared_ptr<compiler> &compiler,
 		judgefs *source_fs, const std::string &source_path);
 	~test();
@@ -30,6 +30,9 @@ public:
 	const judge_result &last_result();
 
 private:
+	void step_spj();
+	void step_normal();
+
 	// non-copyable
 	test(const test &);
 	test &operator=(const test &);
@@ -38,6 +41,7 @@ private:
 	struct context;
 
 private:
+	bool spj_;
 	std::shared_ptr<pool> pool_;
 	std::shared_ptr<compiler> compiler_;
 	judgefs *source_fs_;

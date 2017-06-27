@@ -63,13 +63,50 @@ shared_ptr<temp_dir> compiler::_extract_source(
 	return dir;
 }
 
-shared_ptr<compiler::result> compiler::compile(
+void compiler::_extract_spj_source(
+	shared_ptr<temp_dir> dir,
+	judgefs *fs, const string &path, const string &file_name)
+{
+	fs_filebuf fsbuf(fs, path);
+	istream in(&fsbuf);
+
+	path_a out_path(dir->path());
+	out_path.push(file_name.c_str());
+	ofstream out(out_path.c_str(), ios::binary);
+
+	const size_t buffer_size = 4096;
+	bool result = util::stream_copy<buffer_size>(in, out);
+	if (!result) {
+		throw judge_exception(JSTATUS_GENERIC_ERROR);
+	}
+}
+
+shared_ptr<compiler::result> compiler::compile_normal(
 	pool &pool, judgefs *source_fs, const string &source_path)
 {
 	shared_ptr<compiler::result> result(new compiler::result);
 	result->compiler = shared_from_this();
 	result->dir = _extract_source(pool, source_fs, source_path);
+	_compile(pool, result);
+	return result;
+}
 
+shared_ptr<compiler::result> compiler::compile_spj(
+	pool &pool,
+	judgefs *source_fs, const string &source_header_path, const string &source_header_name,
+	const string &spj_source_path)
+{
+	shared_ptr<compiler::result> result(new compiler::result);
+	result->compiler = shared_from_this();
+	result->dir = _extract_source(pool, source_fs, spj_source_path);
+	_extract_spj_source(result->dir, source_fs, source_header_path, source_header_name);
+	_compile(pool, result);
+	return result;
+}
+
+void compiler::_compile(
+	pool &pool, shared_ptr<compiler::result> result)
+{
 	if (!executable_path_.empty() || !command_line_.empty()) {
 		vector<shared_ptr<env> > envs;
 		pool.take_env(back_inserter(envs), 1);
@@ -100,8 +137,6 @@ shared_ptr<compiler::result> compiler::compile(
 		result->memory_usage_kb = 0;
 		result->runtime_error = 0;
 	}
-
-	return result;
 }
 
 const string &compiler::executable_path()

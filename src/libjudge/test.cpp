@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <winstl/synch/event.hpp>
 #include <judgefs.h>
+#include <iostream>
 #include "test.hpp"
 #include "testcase.hpp"
 #include "pool.hpp"
@@ -32,10 +33,11 @@ struct test::context {
 };
 
 
-test::test(const shared_ptr<pool> &pool,
+test::test(const bool spj, const shared_ptr<pool> &pool,
 	const shared_ptr<compiler> &compiler,
 	judgefs *source_fs, const string &source_path)
-	: pool_(pool)
+	: spj_(spj)
+	, pool_(pool)
 	, compiler_(compiler)
 	, source_fs_(source_fs)
 	, source_path_(source_path)
@@ -57,11 +59,53 @@ void test::add(const shared_ptr<testcase> &testcase)
 
 void test::step()
 {
+	if (spj_) {
+		test::step_spj();
+	} else {
+		test::step_normal();
+	}
+}
+
+void test::step_spj()
+{
+	switch (phase_) {
+	case JUDGE_PHASE_NO_MORE:
+		phase_ = JUDGE_PHASE_TESTCASE;
+		index_ = 0;
+		break;
+
+	case JUDGE_PHASE_TESTCASE:
+		++index_;
+		break;
+
+	default:
+		phase_ = JUDGE_PHASE_NO_MORE;
+		index_ = 0;
+		last_result_ = judge_result();
+		last_context_.reset();
+		return;
+	}
+
+	assert(phase_ == JUDGE_PHASE_TESTCASE);
+
+	if (!contexts_.empty()) {
+		// TODO
+	}
+
+	phase_ = JUDGE_PHASE_SUMMARY;
+	index_ = 0;
+	last_result_ = summary_result_;
+	last_context_.reset();
+}
+
+void test::step_normal()
+{
+	std::cout << "NORMAL_STEP CURRENT = " << phase_ << std::endl;
 	switch (phase_) {
 	case JUDGE_PHASE_NO_MORE:
 		phase_ = JUDGE_PHASE_COMPILE;
 		index_ = 0;
-		compiler_result_ = compiler_->compile(*pool_, source_fs_, source_path_);
+		compiler_result_ = compiler_->compile_normal(*pool_, source_fs_, source_path_);
 		last_result_ = judge_result();
 		if (compiler_result_->flag == JUDGE_ACCEPTED) {
 			if (compiler_result_->exit_code == 0) {
