@@ -94,11 +94,11 @@ shared_ptr<compiler::result> compiler::compile_normal(
 shared_ptr<compiler::result> compiler::compile_spj(
 	pool &pool,
 	judgefs *source_fs, const string &source_header_path, const string &source_header_name,
-	const string &spj_source_path)
+	judgefs *spj_fs, const string &spj_source_path)
 {
 	shared_ptr<compiler::result> result(new compiler::result);
 	result->compiler = shared_from_this();
-	result->dir = _extract_source(pool, source_fs, spj_source_path);
+	result->dir = _extract_source(pool, spj_fs, spj_source_path);
 	_extract_spj_source(result->dir, source_fs, source_header_path, source_header_name);
 	_compile(pool, result);
 	return result;

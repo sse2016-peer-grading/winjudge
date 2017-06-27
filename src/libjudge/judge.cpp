@@ -167,7 +167,7 @@ judge_add_testcase(
 {
 	return util::wrap([=]()->jstatus_t {
 		shared_ptr<judge::test> &t(*reinterpret_cast<shared_ptr<judge::test> *>(test));
-		shared_ptr<judge::testcase> tc(
+		shared_ptr<judge::testcase_impl> tc(
 			new judge::testcase_impl(data_fs, input_path, output_path, sanitize(limit)));
 		t->add(tc);
 		return JSTATUS_SUCCESS;
@@ -179,17 +179,16 @@ __stdcall
 judge_add_testcase_spj(
 	struct judge_test *test,
 	struct judgefs *data_fs,
-	const char *spj_prefix,
-	const char *spj_path_rel,
-	const char *spj_param,
-	struct judge_limit *limit,
-	struct judge_limit *spj_limit)
+	const char *input_path,
+	const char *output_path,
+	const char *spj_source_path,
+	const char *spj_header_name,
+	struct judge_limit *limit)
 {
 	return util::wrap([=]()->jstatus_t {
 		shared_ptr<judge::test> &t(*reinterpret_cast<shared_ptr<judge::test> *>(test));
-		shared_ptr<judge::testcase> tc(
-			new judge::testcase_spj_impl(data_fs, spj_prefix, spj_path_rel, spj_param,
-			sanitize(limit), sanitize(spj_limit)));
+		shared_ptr<judge::testcase_impl> tc(
+			new judge::testcase_impl(data_fs, input_path, output_path, spj_source_path, spj_header_name, sanitize(limit)));
 		t->add(tc);
 		return JSTATUS_SUCCESS;
 	});

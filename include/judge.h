@@ -108,11 +108,11 @@ __stdcall
 judge_add_testcase_spj(
 	struct judge_test *test,
 	struct judgefs *data_fs,
-	const char *spj_prefix,
-	const char *spj_path_rel,
-	const char *spj_param,
-	/* optional */ struct judge_limit *limit,
-	/* optional */ struct judge_limit *spj_limit);
+	const char *input_path,
+	const char *output_path,
+	const char *spj_source_path,
+	const char *spj_header_name,
+	/* optional */ struct judge_limit *limit);
 
 #define JUDGE_PHASE_NO_MORE (0)
 #define JUDGE_PHASE_COMPILE (1)

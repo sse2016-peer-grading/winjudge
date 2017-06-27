@@ -15,6 +15,7 @@ namespace judge {
 
 class pool;
 class testcase;
+class testcase_impl;
 
 class test {
 public:
@@ -23,7 +24,7 @@ public:
 		judgefs *source_fs, const std::string &source_path);
 	~test();
 	
-	void add(const std::shared_ptr<testcase> &testcase);
+	void add(const std::shared_ptr<testcase_impl> &testcase);
 	void step();
 	std::uint32_t phase();
 	std::uint32_t index();

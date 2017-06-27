@@ -14,8 +14,7 @@ public:
 	~Test() { this->!Test(); }
 	!Test();
 	void AddTestcase(JudgeFs::Fs ^dataFs, System::String ^inputPath, System::String ^outputPath, JudgeLimit ^limit);
-	void AddTestcaseSpj(JudgeFs::Fs ^dataFs, System::String ^spjPrefix, System::String ^spjPathRel, System::String ^spjParam,
-		JudgeLimit ^limit, JudgeLimit ^spjLimit);
+	void AddTestcaseSpj(JudgeFs::Fs ^dataFs, System::String ^inputPath, System::String ^outputPath, System::String ^spjSourcePath, System::String ^spjHeaderName, JudgeLimit ^limit);
 	StepResult ^Step();
 
 private:

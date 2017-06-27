@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <winstl/synch/event.hpp>
 #include <judgefs.h>
-#include <iostream>
 #include "test.hpp"
 #include "testcase.hpp"
 #include "pool.hpp"
@@ -19,7 +18,7 @@ using winstl::event;
 namespace judge {
 
 struct test::context {
-	explicit context(const std::shared_ptr<testcase> &testcase)
+	explicit context(const std::shared_ptr<testcase_impl> &testcase)
 		: event(true, false)
 		, status(JSTATUS_SUCCESS)
 		, testcase(testcase)
@@ -27,7 +26,7 @@ struct test::context {
 	{}
 
 	winstl::event event;
-	std::shared_ptr<testcase> testcase;
+	std::shared_ptr<testcase_impl> testcase;
 	jstatus_t status;
 	judge_result result;
 };
@@ -52,7 +51,7 @@ test::~test()
 	judgefs_release(source_fs_);
 }
 
-void test::add(const shared_ptr<testcase> &testcase)
+void test::add(const shared_ptr<testcase_impl> &testcase)
 {
 	contexts_.push_back(make_shared<context>(testcase));
 }
@@ -70,6 +69,19 @@ void test::step_spj()
 {
 	switch (phase_) {
 	case JUDGE_PHASE_NO_MORE:
+		phase_ = JUDGE_PHASE_COMPILE;
+		index_ = 0;
+		last_result_ = judge_result();
+		last_result_.flag = JUDGE_ACCEPTED;
+		last_result_.time_usage_ms = 0;
+		last_result_.memory_usage_kb = 0;
+		last_result_.runtime_error = 0;
+		last_result_.judge_output = "";
+		last_result_.user_output = nullptr;
+		last_context_.reset();
+		return;
+
+	case JUDGE_PHASE_COMPILE:
 		phase_ = JUDGE_PHASE_TESTCASE;
 		index_ = 0;
 		break;
@@ -86,10 +98,59 @@ void test::step_spj()
 		return;
 	}
 
+	auto compiler = compiler_;
+	auto source_fs = source_fs_;
+	auto source_path = source_path_;
+	auto pool = pool_;
+
 	assert(phase_ == JUDGE_PHASE_TESTCASE);
 
 	if (!contexts_.empty()) {
-		// TODO
+		if (index_ == 0) {
+			for_each(contexts_.begin(), contexts_.end(),
+				[&](const shared_ptr<context> &ctx)->void
+			{
+				pool_->thread_pool().queue([pool, ctx, &compiler, &source_fs, &source_path]()->void {
+					//auto &env0 = env;
+					auto &ctx0 = ctx;
+					ctx->status = util::wrap([&]()->jstatus_t {
+						auto cr = ctx0->testcase->compile_spj(*pool, compiler, source_fs, source_path);
+						auto result = judge_result();
+						if (cr->flag != JUDGE_ACCEPTED) {
+							result.flag = cr->flag;
+						} else if (cr->flag == JUDGE_ACCEPTED && cr->exit_code != 0) {
+							result.flag = JUDGE_COMPILE_ERROR;
+							result.judge_output = cr->std_output.c_str();
+						} else {
+							result.flag = JUDGE_ACCEPTED;
+						}
+						if (cr->flag == JUDGE_ACCEPTED && cr->exit_code == 0) {
+							vector<shared_ptr<env> > envs;
+							pool->take_env(back_inserter(envs), 1);
+							shared_ptr<env> env = move(envs.front());
+							result = ctx0->testcase->run(*env, *cr);
+						}
+						ctx0->result = result; 
+						return JSTATUS_SUCCESS;
+					});
+					ctx->event.set();
+				});
+			});
+		}
+
+		last_context_ = contexts_.front();
+		contexts_.pop_front();
+		if (::WaitForSingleObject(last_context_->event.get(), INFINITE) == WAIT_FAILED) {
+			throw win32_exception(::GetLastError());
+		}
+		if (!JSUCCESS(last_context_->status)) {
+			throw judge_exception(last_context_->status);
+		}
+		last_result_ = last_context_->result;
+		summary_result_.flag = max(summary_result_.flag, last_result_.flag);
+		summary_result_.time_usage_ms += last_result_.time_usage_ms;
+		summary_result_.memory_usage_kb = max(summary_result_.memory_usage_kb, last_result_.memory_usage_kb);
+		return;
 	}
 
 	phase_ = JUDGE_PHASE_SUMMARY;
@@ -100,7 +161,6 @@ void test::step_spj()
 
 void test::step_normal()
 {
-	std::cout << "NORMAL_STEP CURRENT = " << phase_ << std::endl;
 	switch (phase_) {
 	case JUDGE_PHASE_NO_MORE:
 		phase_ = JUDGE_PHASE_COMPILE;

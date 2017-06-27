@@ -42,7 +42,7 @@ public:
 	std::shared_ptr<compiler::result> compiler::compile_spj(
 		pool &pool,
 		judgefs *source_fs, const std::string &source_header_path, const std::string &source_header_name,
-		const std::string &spj_source_path);
+		judgefs *spj_fs, const std::string &spj_source_path);
 
 private:
 	// non-copyable

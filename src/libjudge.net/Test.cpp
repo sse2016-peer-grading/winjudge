@@ -56,12 +56,11 @@ void Test::AddTestcase(JudgeFs::Fs ^dataFs, System::String ^inputPath, System::S
 	}
 }
 
-void Test::AddTestcaseSpj(JudgeFs::Fs ^dataFs, System::String ^spjPrefix, System::String ^spjPathRel, System::String ^spjParam,
-	JudgeLimit ^limit, JudgeLimit ^spjLimit)
+
+void Test::AddTestcaseSpj(JudgeFs::Fs ^dataFs, System::String ^inputPath, System::String ^outputPath, System::String ^spjSourcePath, System::String ^spjHeaderName, JudgeLimit ^limit)
 {
 	marshal_context mc;
 	struct judge_limit limit0;
-	struct judge_limit spj_limit0;
 
 	if (limit) {
 		limit0.time_limit_ms = limit->TimeLimitMs;
@@ -70,19 +69,12 @@ void Test::AddTestcaseSpj(JudgeFs::Fs ^dataFs, System::String ^spjPrefix, System
 		limit0.stderr_output_limit = limit->StderrOutputLimit;
 	}
 
-	if (spjLimit) {
-		spj_limit0.time_limit_ms = spjLimit->TimeLimitMs;
-		spj_limit0.memory_limit_kb = spjLimit->MemoryLimitKb;
-		spj_limit0.active_process_limit = spjLimit->ActiveProcessLimit;
-		spj_limit0.stderr_output_limit = spjLimit->StderrOutputLimit;
-	}
-
 	jstatus_t status = judge_add_testcase_spj(test_, dataFs->Handle(),
-		mc.marshal_as<const char *>(spjPrefix),
-		mc.marshal_as<const char *>(spjPathRel),
-		mc.marshal_as<const char *>(spjParam),
-		limit ? &limit0 : nullptr,
-		spjLimit ? &spj_limit0 : nullptr);
+		mc.marshal_as<const char *>(inputPath),
+		mc.marshal_as<const char *>(outputPath),
+		mc.marshal_as<const char *>(spjSourcePath),
+		mc.marshal_as<const char *>(spjHeaderName),
+		limit ? &limit0 : nullptr);
 	if (!JSUCCESS(status)) {
 		throw gcnew JudgeException(status);
 	}

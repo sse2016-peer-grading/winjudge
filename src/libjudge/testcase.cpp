@@ -150,6 +150,20 @@ testcase_impl::testcase_impl(judgefs *data_fs, const string &input_path,
 	: data_fs_(data_fs)
 	, input_path_(input_path)
 	, output_path_(output_path)
+	, spj_(false)
+	, limit_(limit)
+{
+	judgefs_add_ref(data_fs_);
+}
+
+testcase_impl::testcase_impl(judgefs *data_fs, const string &input_path, const string &output_path,
+	const string &spj_source_path, const string &spj_header_name, judge_limit &limit)
+	: data_fs_(data_fs)
+	, input_path_(input_path)
+	, output_path_(output_path)
+	, spj_(true)
+	, spj_source_path_(spj_source_path)
+	, spj_header_name_(spj_header_name)
 	, limit_(limit)
 {
 	judgefs_add_ref(data_fs_);
@@ -158,6 +172,11 @@ testcase_impl::testcase_impl(judgefs *data_fs, const string &input_path,
 testcase_impl::~testcase_impl()
 {
 	judgefs_release(data_fs_);
+}
+
+shared_ptr<compiler::result> testcase_impl::compile_spj(pool &pool, shared_ptr<compiler> c, judgefs *source_fs, const string &source_path)
+{
+	return c->compile_spj(pool, source_fs, source_path, spj_header_name_, data_fs_, spj_source_path_);
 }
 
 judge_result testcase_impl::run(env &env, compiler::result &cr)

@@ -32,7 +32,12 @@ class testcase_impl : public testcase {
 public:
 	testcase_impl(judgefs *data_fs, const std::string &input_path,
 		const std::string &output_path, judge_limit &limit);
+	testcase_impl(judgefs *data_fs, const std::string &input_path, const std::string &output_path,
+		const std::string &spj_source_path, const std::string &spj_header_name, judge_limit &limit);
 	~testcase_impl();
+
+	std::shared_ptr<compiler::result> compile_spj(pool &pool, std::shared_ptr<compiler> c, judgefs *source_fs, const std::string &source_path);
+
 	/* override */ judge_result run(env &env, compiler::result &cr);
 
 private:
@@ -42,6 +47,9 @@ private:
 	judgefs *data_fs_;
 	std::string input_path_;
 	std::string output_path_;
+	bool spj_;
+	std::string spj_header_name_;
+	std::string spj_source_path_;
 	judge_limit limit_;
 	std::string judge_output_;
 	std::string user_output_;
