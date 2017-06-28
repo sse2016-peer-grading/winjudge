@@ -29,6 +29,7 @@ struct test::context {
 	std::shared_ptr<testcase_impl> testcase;
 	jstatus_t status;
 	judge_result result;
+	std::shared_ptr<compiler::result> compiler_result;
 };
 
 
@@ -111,24 +112,23 @@ void test::step_spj()
 				[&](const shared_ptr<context> &ctx)->void
 			{
 				pool_->thread_pool().queue([pool, ctx, &compiler, &source_fs, &source_path]()->void {
-					//auto &env0 = env;
 					auto &ctx0 = ctx;
 					ctx->status = util::wrap([&]()->jstatus_t {
-						auto cr = ctx0->testcase->compile_spj(*pool, compiler, source_fs, source_path);
+						ctx0->compiler_result = ctx0->testcase->compile_spj(*pool, compiler, source_fs, source_path);
 						auto result = judge_result();
-						if (cr->flag != JUDGE_ACCEPTED) {
-							result.flag = cr->flag;
-						} else if (cr->flag == JUDGE_ACCEPTED && cr->exit_code != 0) {
+						if (ctx0->compiler_result->flag != JUDGE_ACCEPTED) {
+							result.flag = ctx0->compiler_result->flag;
+						} else if (ctx0->compiler_result->flag == JUDGE_ACCEPTED && ctx0->compiler_result->exit_code != 0) {
 							result.flag = JUDGE_COMPILE_ERROR;
-							result.judge_output = cr->std_output.c_str();
+							result.judge_output = ctx0->compiler_result->std_output.c_str();
 						} else {
 							result.flag = JUDGE_ACCEPTED;
 						}
-						if (cr->flag == JUDGE_ACCEPTED && cr->exit_code == 0) {
+						if (ctx0->compiler_result->flag == JUDGE_ACCEPTED && ctx0->compiler_result->exit_code == 0) {
 							vector<shared_ptr<env> > envs;
 							pool->take_env(back_inserter(envs), 1);
 							shared_ptr<env> env = move(envs.front());
-							result = ctx0->testcase->run(*env, *cr);
+							result = ctx0->testcase->run(*env, *(ctx0->compiler_result));
 						}
 						ctx0->result = result; 
 						return JSTATUS_SUCCESS;
